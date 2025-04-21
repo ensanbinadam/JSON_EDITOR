@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم محرر JSON للاختبارات</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 90vh;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        select, input[type="file"], button, input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        select {
+            background-color: #fff;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .success-message {
+            padding: 15px;
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message {
+            padding: 15px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .main-content {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+        
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .question-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .question-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .question-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .question-item.active {
+            background-color: #e3f2fd;
+            border-right: 3px solid #3498db;
+        }
+        
+        .question-number {
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .question-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .editor-container {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            flex: 1;
+        }
+        
+        .editor-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .editor-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-left: 5px;
+        }
+        
+        .editor-tab.active {
+            background-color: #fff;
+            border-bottom: 1px solid #fff;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        
+        .editor-content {
+            display: none;
+        }
+        
+        .editor-content.active {
+            display: block;
+        }
+        
+        .question-editor {
+            margin-bottom: 20px;
+        }
+        
+        .options-editor {
+            margin-bottom: 20px;
+        }
+        
+        .option-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fff;
+        }
+        
+        .option-container.correct {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .option-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .option-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .image-preview {
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+        }
+        
+        .thumbnail {
+            max-width: 50px;
+            max-height: 50px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .action-button {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .add-button {
+            background-color: #2ecc71;
+        }
+        
+        .add-button:hover {
+            background-color: #27ae60;
+        }
+        
+        .duplicate-button {
+            background-color: #9b59b6;
+        }
+        
+        .duplicate-button:hover {
+            background-color: #8e44ad;
+        }
+        
+        .delete-button {
+            background-color: #e74c3c;
+        }
+        
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+        
+        .import-export {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .import-export-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .import-export-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .import-button, .export-button, .merge-button {
+            flex: 1;
+        }
+        
+        .import-button {
+            background-color: #f39c12;
+        }
+        
+        .import-button:hover {
+            background-color: #d35400;
+        }
+        
+        .export-button {
+            background-color: #16a085;
+        }
+        
+        .export-button:hover {
+            background-color: #1abc9c;
+        }
+        
+        .merge-button {
+            background-color: #3498db;
+        }
+        
+        .merge-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .preview-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            background-color: #fff;
+        }
+        
+        .preview-question {
+            margin-bottom: 20px;
+        }
+        
+        .preview-question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .preview-options {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .preview-option {
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        
+        .preview-option.correct {
+            background-color: #d4edda;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 60%;
+            max-width: 600px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        
+        .close-button {
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-container input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-input-button {
+            display: block;
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .file-name {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .image-upload-container {
+            margin-top: 10px;
+        }
+        
+        .image-url-input {
+            margin-top: 10px;
+        }
+        
+        .radio-group {
+            margin-bottom: 15px;
+        }
+        
+        .radio-label {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 15px;
+            cursor: pointer;
+        }
+        
+        .radio-label input[type="radio"] {
+            margin-left: 5px;
+        }
+        
+        .no-questions {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .action-buttons, .import-export-buttons {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>لوحة تحكم محرر JSON للاختبارات</h1>
+        
+        <div class="success-message" id="successMessage"></div>
+        <div class="error-message" id="errorMessage"></div>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="form-group">
+                    <button id="addQuestionButton" class="add-button">إضافة سؤال جديد</button>
+                </div>
+                
+                <div id="questionListContainer">
+                    <div class="loading" id="loadingIndicator">
+                        <div class="spinner"></div>
+                        <p>جاري التحميل...</p>
+                    </div>
+                    <div class="no-questions" id="noQuestionsMessage" style="display: none;">
+                        لا توجد أسئلة. قم باستيراد ملف JSON أو إضافة سؤال جديد.
+                    </div>
+                    <ul class="question-list" id="questionList"></ul>
+                </div>
+            </div>
+            
+            <div class="content-area">
+                <div class="editor-container" id="editorContainer">
+                    <div class="editor-tabs">
+                        <div class="editor-tab active" data-tab="editor">محرر السؤال</div>
+                        <div class="editor-tab" data-tab="preview">معاينة</div>
+                    </div>
+                    
+                    <div class="editor-content active" id="editorTab">
+                        <div class="question-editor">
+                            <div class="form-group">
+                                <label for="questionText">نص السؤال:</label>
+                                <textarea id="questionText" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>صورة السؤال:</label>
+                                <div class="image-preview" id="questionImagePreview">
+                                    <p>لا توجد صورة</p>
+                                </div>
+                                <div class="image-upload-container">
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="questionImageType" value="upload" checked> رفع صورة
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="questionImageType" value="url"> رابط صورة
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="questionImageType" value="none"> بدون صورة
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="file-input-container" id="questionImageUpload">
+                                        <div class="file-input-button">اختر صورة</div>
+                                        <input type="file" id="questionImageFile" accept="image/*">
+                                        <div class="file-name" id="questionImageFileName"></div>
+                                    </div>
+                                    
+                                    <div class="image-url-input" id="questionImageUrl" style="display: none;">
+                                        <input type="text" id="questionImageUrlInput" placeholder="أدخل رابط الصورة">
+                                        <button id="questionImageUrlButton">تحميل الصورة</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="options-editor">
+                            <h3>الخيارات:</h3>
+                            <div id="optionsContainer"></div>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <div class="action-button">
+                                <button id="saveQuestionButton">حفظ التغييرات</button>
+                            </div>
+                            <div class="action-button">
+                                <button id="duplicateQuestionButton" class="duplicate-button">تكرار السؤال</button>
+                            </div>
+                            <div class="action-button">
+                                <button id="deleteQuestionButton" class="delete-button">حذف السؤال</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="editor-content" id="previewTab">
+                        <div class="preview-container" id="previewContainer"></div>
+                    </div>
+                </div>
+                
+                <div class="import-export">
+                    <div class="import-export-title">استيراد / تصدير</div>
+                    <div class="import-export-buttons">
+                        <div class="import-button">
+                            <button id="importButton">استيراد ملف JSON</button>
+                        </div>
+                        <div class="export-button">
+                            <button id="exportButton">تصدير إلى ملف JSON</button>
+                        </div>
+                        <div class="merge-button">
+                            <button id="mergeButton">دمج مع ملف JSON</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for importing JSON -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">استيراد ملف JSON</div>
+                <span class="close-button" id="closeImportModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>اختر ملف JSON:</label>
+                    <div class="file-input-container">
+                        <div class="file-input-button">اختر ملف</div>
+                        <input type="file" id="importJsonFile" accept=".json">
+                        <div class="file-name" id="importJsonFileName"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="importType" value="replace" checked> استبدال البيانات الحالية
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="importType" value="append"> إضافة إلى البيانات الحالية
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmImportButton">استيراد</button>
+                <button id="cancelImportButton">إلغاء</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for merging JSON -->
+    <div class="modal" id="mergeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">دمج مع ملف JSON</div>
+                <span class="close-button" id="closeMergeModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>اختر ملف JSON للدمج:</label>
+                    <div class="file-input-container">
+                        <div class="file-input-button">اختر ملف</div>
+                        <input type="file" id="mergeJsonFile" accept=".json">
+                        <div class="file-name" id="mergeJsonFileName"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmMergeButton">دمج</button>
+                <button id="cancelMergeButton">إلغاء</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for confirming delete -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">تأكيد الحذف</div>
+                <span class="close-button" id="closeDeleteModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>هل أنت متأكد من حذف هذا السؤال؟</p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmDeleteButton" class="delete-button">حذف</button>
+                <button id="cancelDeleteButton">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تحويل الأرقام العربية إلى الأرقام الهندية
+        function toArabicNumerals(num) {
+            const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            return String(num).replace(/[0-9]/g, (d) => arabicNumerals[d]);
+        }
+        
+        // تحويل الأرقام الهندية إلى الأرقام العربية
+        function fromArabicNumerals(str) {
+            const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            return String(str).replace(/[٠-٩]/g, (d) => arabicNumerals.indexOf(d));
+        }
+        
+        // كائن لإدارة البيانات
+        const DataManager = {
+            quizData: [],
+            currentQuestionIndex: -1,
+            
+            // تهيئة البيانات
+            init: function() {
+                this.quizData = [];
+                this.currentQuestionIndex = -1;
+                UI.updateQuestionList();
+                UI.resetEditor();
+            },
+            
+            // إضافة سؤال جديد
+            addNewQuestion: function() {
+                const newQuestion = {
+                    question: {
+                        text: '',
+                        image: null
+                    },
+                    options: [
+                        { text: '', image: null },
+                        { text: '', image: null },
+                        { text: '', image: null },
+                        { text: '', image: null }
+                    ],
+                    correct: 0
+                };
+                
+                this.quizData.push(newQuestion);
+                this.currentQuestionIndex = this.quizData.length - 1;
+                
+                UI.updateQuestionList();
+                UI.loadQuestion(this.currentQuestionIndex);
+                UI.showSuccess('تمت إضافة سؤال جديد');
+            },
+            
+            // تكرار السؤال الحالي
+            duplicateCurrentQuestion: function() {
+                if (this.currentQuestionIndex === -1) return;
+                
+                const currentQuestion = this.quizData[this.currentQuestionIndex];
+                const duplicatedQuestion = JSON.parse(JSON.stringify(currentQuestion));
+                
+                this.quizData.push(duplicatedQuestion);
+                this.currentQuestionIndex = this.quizData.length - 1;
+                
+                UI.updateQuestionList();
+                UI.loadQuestion(this.currentQuestionIndex);
+                UI.showSuccess('تم تكرار السؤال بنجاح');
+            },
+            
+            // حذف السؤال الحالي
+            deleteCurrentQuestion: function() {
+                if (this.currentQuestionIndex === -1) return;
+                
+                this.quizData.splice(this.currentQuestionIndex, 1);
+                
+                if (this.quizData.length === 0) {
+                    this.currentQuestionIndex = -1;
+                    UI.resetEditor();
+                } else {
+                    this.currentQuestionIndex = Math.min(this.currentQuestionIndex, this.quizData.length - 1);
+                    UI.loadQuestion(this.currentQuestionIndex);
+                }
+                
+                UI.updateQuestionList();
+                UI.showSuccess('تم حذف السؤال بنجاح');
+            },
+            
+            // حفظ التغييرات للسؤال الحالي
+            saveCurrentQuestion: function() {
+                if (this.currentQuestionIndex === -1) return;
+                
+                try {
+                    const questionText = document.getElementById('questionText').value;
+                    const questionImage = UI.elements.questionImagePreview.getAttribute('data-image-src') || null;
+                    
+                    const options = [];
+                    const optionsContainer = document.getElementById('optionsContainer');
+                    const optionElements = optionsContainer.querySelectorAll('.option-container');
+                    
+                    let correctIndex = 0;
+                    
+                    optionElements.forEach((element, index) => {
+                        const textInput = element.querySelector('.option-text');
+                        const imageSrc = element.querySelector('.image-preview').getAttribute('data-image-src') || null;
+                        const isCorrect = element.classList.contains('correct');
+                        
+                        if (isCorrect) {
+                            correctIndex = index;
+                        }
+                        
+                        options.push({
+                            text: textInput.value,
+                            image: imageSrc
+                        });
+                    });
+                    
+                    this.quizData[this.currentQuestionIndex] = {
+                        question: {
+                            text: questionText,
+                            image: questionImage
+                        },
+                        options: options,
+                        correct: correctIndex
+                    };
+                    
+                    UI.updateQuestionList();
+                    UI.updatePreview();
+                    UI.showSuccess('تم حفظ التغييرات بنجاح');
+                    
+                    // حفظ البيانات في localStorage
+                    this.saveToLocalStorage();
+                } catch (error) {
+                    console.error('Error saving question:', error);
+                    UI.showError('حدث خطأ أثناء حفظ السؤال: ' + error.message);
+                }
+            },
+            
+            // حفظ البيانات في localStorage
+            saveToLocalStorage: function() {
+                try {
+                    localStorage.setItem('quizData', JSON.stringify(this.quizData));
+                } catch (error) {
+                    console.error('Error saving to localStorage:', error);
+                }
+            },
+            
+            // استيراد بيانات من ملف JSON
+            importData: function(jsonData, importType) {
+                try {
+                    let data;
+                    try {
+                        data = JSON.parse(jsonData);
+                    } catch (e) {
+                        throw new Error('تنسيق JSON غير صالح. تأكد من أن الملف يحتوي على بيانات JSON صحيحة.');
+                    }
+                    
+                    if (!Array.isArray(data)) {
+                        throw new Error('تنسيق البيانات غير صحيح. يجب أن تكون البيانات مصفوفة من الأسئلة.');
+                    }
+                    
+                    // التحقق من صحة البيانات
+                    const validatedData = [];
+                    for (const item of data) {
+                        // إذا كان العنصر لا يحتوي على الحقول المطلوبة، نحاول إصلاحه
+                        const validItem = this.validateAndFixQuestionItem(item);
+                        validatedData.push(validItem);
+                    }
+                    
+                    if (importType === 'replace') {
+                        this.quizData = validatedData;
+                    } else {
+                        this.quizData = this.quizData.concat(validatedData);
+                    }
+                    
+                    this.currentQuestionIndex = this.quizData.length > 0 ? 0 : -1;
+                    
+                    UI.updateQuestionList();
+                    
+                    if (this.currentQuestionIndex !== -1) {
+                        UI.loadQuestion(this.currentQuestionIndex);
+                    } else {
+                        UI.resetEditor();
+                    }
+                    
+                    // حفظ البيانات في localStorage
+                    this.saveToLocalStorage();
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Error importing data:', error);
+                    UI.showError('حدث خطأ أثناء استيراد البيانات: ' + error.message);
+                    return false;
+                }
+            },
+            
+            // التحقق من صحة عنصر السؤال وإصلاحه إذا لزم الأمر
+            validateAndFixQuestionItem: function(item) {
+                const validItem = {
+                    question: {
+                        text: '',
+                        image: null
+                    },
+                    options: [
+                        { text: '', image: null },
+                        { text: '', image: null },
+                        { text: '', image: null },
+                        { text: '', image: null }
+                    ],
+                    correct: 0
+                };
+                
+                // نسخ بيانات السؤال إذا كانت موجودة
+                if (item.question) {
+                    if (typeof item.question === 'object') {
+                        validItem.question.text = item.question.text || '';
+                        validItem.question.image = item.question.image || null;
+                    } else if (typeof item.question === 'string') {
+                        validItem.question.text = item.question;
+                    }
+                } else if (item.text) {
+                    // بعض التنسيقات قد تستخدم "text" بدلاً من "question"
+                    validItem.question.text = item.text;
+                    if (item.image) {
+                        validItem.question.image = item.image;
+                    }
+                }
+                
+                // نسخ بيانات الخيارات إذا كانت موجودة
+                if (Array.isArray(item.options)) {
+                    for (let i = 0; i < Math.min(item.options.length, 4); i++) {
+                        const option = item.options[i];
+                        if (typeof option === 'object') {
+                            validItem.options[i].text = option.text || '';
+                            validItem.options[i].image = option.image || null;
+                        } else if (typeof option === 'string') {
+                            validItem.options[i].text = option;
+                        }
+                    }
+                } else if (Array.isArray(item.choices)) {
+                    // بعض التنسيقات قد تستخدم "choices" بدلاً من "options"
+                    for (let i = 0; i < Math.min(item.choices.length, 4); i++) {
+                        const choice = item.choices[i];
+                        if (typeof choice === 'object') {
+                            validItem.options[i].text = choice.text || '';
+                            validItem.options[i].image = choice.image || null;
+                        } else if (typeof choice === 'string') {
+                            validItem.options[i].text = choice;
+                        }
+                    }
+                }
+                
+                // نسخ الإجابة الصحيحة إذا كانت موجودة
+                if (typeof item.correct === 'number' && item.correct >= 0 && item.correct < 4) {
+                    validItem.correct = item.correct;
+                } else if (typeof item.answer === 'number' && item.answer >= 0 && item.answer < 4) {
+                    // بعض التنسيقات قد تستخدم "answer" بدلاً من "correct"
+                    validItem.correct = item.answer;
+                }
+                
+                return validItem;
+            },
+            
+            // تصدير البيانات إلى ملف JSON
+            exportData: function() {
+                try {
+                    return JSON.stringify(this.quizData, null, 2);
+                } catch (error) {
+                    console.error('Error exporting data:', error);
+                    UI.showError('حدث خطأ أثناء تصدير البيانات: ' + error.message);
+                    return null;
+                }
+            },
+            
+            // تحميل البيانات من localStorage
+            loadFromLocalStorage: function() {
+                try {
+                    const savedData = localStorage.getItem('quizData');
+                    if (savedData) {
+                        return this.importData(savedData, 'replace');
+                    }
+                    return false;
+                } catch (error) {
+                    console.error('Error loading from localStorage:', error);
+                    return false;
+                }
+            }
+        };
+        
+        // كائن لإدارة واجهة المستخدم
+        const UI = {
+            // عناصر DOM
+            elements: {
+                questionList: document.getElementById('questionList'),
+                questionListContainer: document.getElementById('questionListContainer'),
+                loadingIndicator: document.getElementById('loadingIndicator'),
+                noQuestionsMessage: document.getElementById('noQuestionsMessage'),
+                editorContainer: document.getElementById('editorContainer'),
+                questionText: document.getElementById('questionText'),
+                questionImagePreview: document.getElementById('questionImagePreview'),
+                questionImageFile: document.getElementById('questionImageFile'),
+                questionImageFileName: document.getElementById('questionImageFileName'),
+                questionImageUpload: document.getElementById('questionImageUpload'),
+                questionImageUrl: document.getElementById('questionImageUrl'),
+                questionImageUrlInput: document.getElementById('questionImageUrlInput'),
+                questionImageUrlButton: document.getElementById('questionImageUrlButton'),
+                optionsContainer: document.getElementById('optionsContainer'),
+                previewContainer: document.getElementById('previewContainer'),
+                successMessage: document.getElementById('successMessage'),
+                errorMessage: document.getElementById('errorMessage'),
+                addQuestionButton: document.getElementById('addQuestionButton'),
+                saveQuestionButton: document.getElementById('saveQuestionButton'),
+                duplicateQuestionButton: document.getElementById('duplicateQuestionButton'),
+                deleteQuestionButton: document.getElementById('deleteQuestionButton'),
+                importButton: document.getElementById('importButton'),
+                exportButton: document.getElementById('exportButton'),
+                mergeButton: document.getElementById('mergeButton'),
+                importModal: document.getElementById('importModal'),
+                closeImportModal: document.getElementById('closeImportModal'),
+                importJsonFile: document.getElementById('importJsonFile'),
+                importJsonFileName: document.getElementById('importJsonFileName'),
+                confirmImportButton: document.getElementById('confirmImportButton'),
+                cancelImportButton: document.getElementById('cancelImportButton'),
+                mergeModal: document.getElementById('mergeModal'),
+                closeMergeModal: document.getElementById('closeMergeModal'),
+                mergeJsonFile: document.getElementById('mergeJsonFile'),
+                mergeJsonFileName: document.getElementById('mergeJsonFileName'),
+                confirmMergeButton: document.getElementById('confirmMergeButton'),
+                cancelMergeButton: document.getElementById('cancelMergeButton'),
+                deleteModal: document.getElementById('deleteModal'),
+                closeDeleteModal: document.getElementById('closeDeleteModal'),
+                confirmDeleteButton: document.getElementById('confirmDeleteButton'),
+                cancelDeleteButton: document.getElementById('cancelDeleteButton'),
+                editorTabs: document.querySelectorAll('.editor-tab')
+            },
+            
+            // تهيئة واجهة المستخدم
+            init: function() {
+                this.setupEventListeners();
+                this.showLoading(true);
+                
+                // محاولة تحميل البيانات المحفوظة
+                setTimeout(() => {
+                    const loaded = DataManager.loadFromLocalStorage();
+                    
+                    this.showLoading(false);
+                    
+                    if (!loaded) {
+                        this.showNoQuestionsMessage(true);
+                        this.resetEditor();
+                    }
+                }, 500);
+            },
+            
+            // إعداد مستمعي الأحداث
+            setupEventListeners: function() {
+                // أزرار الإجراءات الرئيسية
+                this.elements.addQuestionButton.addEventListener('click', () => {
+                    DataManager.addNewQuestion();
+                });
+                
+                this.elements.saveQuestionButton.addEventListener('click', () => {
+                    DataManager.saveCurrentQuestion();
+                });
+                
+                this.elements.duplicateQuestionButton.addEventListener('click', () => {
+                    DataManager.duplicateCurrentQuestion();
+                });
+                
+                this.elements.deleteQuestionButton.addEventListener('click', () => {
+                    this.showDeleteModal();
+                });
+                
+                // أزرار الاستيراد والتصدير
+                this.elements.importButton.addEventListener('click', () => {
+                    this.showImportModal();
+                });
+                
+                this.elements.exportButton.addEventListener('click', () => {
+                    this.exportToJson();
+                });
+                
+                this.elements.mergeButton.addEventListener('click', () => {
+                    this.showMergeModal();
+                });
+                
+                // مستمعي أحداث النوافذ المنبثقة
+                this.elements.closeImportModal.addEventListener('click', () => {
+                    this.hideImportModal();
+                });
+                
+                this.elements.cancelImportButton.addEventListener('click', () => {
+                    this.hideImportModal();
+                });
+                
+                this.elements.confirmImportButton.addEventListener('click', () => {
+                    this.importFromJson();
+                });
+                
+                this.elements.closeMergeModal.addEventListener('click', () => {
+                    this.hideMergeModal();
+                });
+                
+                this.elements.cancelMergeButton.addEventListener('click', () => {
+                    this.hideMergeModal();
+                });
+                
+                this.elements.confirmMergeButton.addEventListener('click', () => {
+                    this.mergeFromJson();
+                });
+                
+                this.elements.closeDeleteModal.addEventListener('click', () => {
+                    this.hideDeleteModal();
+                });
+                
+                this.elements.cancelDeleteButton.addEventListener('click', () => {
+                    this.hideDeleteModal();
+                });
+                
+                this.elements.confirmDeleteButton.addEventListener('click', () => {
+                    DataManager.deleteCurrentQuestion();
+                    this.hideDeleteModal();
+                });
+                
+                // مستمعي أحداث ملفات الاستيراد
+                this.elements.importJsonFile.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        this.elements.importJsonFileName.textContent = e.target.files[0].name;
+                    } else {
+                        this.elements.importJsonFileName.textContent = '';
+                    }
+                });
+                
+                this.elements.mergeJsonFile.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        this.elements.mergeJsonFileName.textContent = e.target.files[0].name;
+                    } else {
+                        this.elements.mergeJsonFileName.textContent = '';
+                    }
+                });
+                
+                // مستمعي أحداث صورة السؤال
+                this.elements.questionImageFile.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        const file = e.target.files[0];
+                        this.elements.questionImageFileName.textContent = file.name;
+                        this.loadImageFromFile(file, this.elements.questionImagePreview);
+                    } else {
+                        this.elements.questionImageFileName.textContent = '';
+                    }
+                });
+                
+                this.elements.questionImageUrlButton.addEventListener('click', () => {
+                    const url = this.elements.questionImageUrlInput.value.trim();
+                    if (url) {
+                        this.loadImageFromUrl(url, this.elements.questionImagePreview);
+                    }
+                });
+                
+                // مستمعي أحداث نوع صورة السؤال
+                const questionImageTypeRadios = document.querySelectorAll('input[name="questionImageType"]');
+                questionImageTypeRadios.forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        const value = radio.value;
+                        if (value === 'upload') {
+                            this.elements.questionImageUpload.style.display = 'block';
+                            this.elements.questionImageUrl.style.display = 'none';
+                        } else if (value === 'url') {
+                            this.elements.questionImageUpload.style.display = 'none';
+                            this.elements.questionImageUrl.style.display = 'block';
+                        } else {
+                            this.elements.questionImageUpload.style.display = 'none';
+                            this.elements.questionImageUrl.style.display = 'none';
+                            this.elements.questionImagePreview.innerHTML = '<p>لا توجد صورة</p>';
+                            this.elements.questionImagePreview.setAttribute('data-image-src', '');
+                        }
+                    });
+                });
+                
+                // مستمعي أحداث التبويبات
+                this.elements.editorTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        this.switchTab(tab.getAttribute('data-tab'));
+                    });
+                });
+            },
+            
+            // تحديث قائمة الأسئلة
+            updateQuestionList: function() {
+                const questionList = this.elements.questionList;
+                questionList.innerHTML = '';
+                
+                if (DataManager.quizData.length === 0) {
+                    this.showNoQuestionsMessage(true);
+                    return;
+                }
+                
+                this.showNoQuestionsMessage(false);
+                
+                DataManager.quizData.forEach((question, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'question-item';
+                    if (index === DataManager.currentQuestionIndex) {
+                        listItem.classList.add('active');
+                    }
+                    
+                    const questionNumber = document.createElement('div');
+                    questionNumber.className = 'question-number';
+                    questionNumber.textContent = 'سؤال ' + toArabicNumerals(index + 1);
+                    
+                    const questionText = document.createElement('div');
+                    questionText.className = 'question-text';
+                    questionText.textContent = question.question.text || 'سؤال بدون نص';
+                    
+                    // إضافة صورة مصغرة إذا كانت موجودة
+                    if (question.question.image) {
+                        const thumbnail = document.createElement('img');
+                        thumbnail.className = 'thumbnail';
+                        thumbnail.src = question.question.image;
+                        thumbnail.alt = 'صورة مصغرة';
+                        questionNumber.prepend(thumbnail);
+                    }
+                    
+                    listItem.appendChild(questionNumber);
+                    listItem.appendChild(questionText);
+                    
+                    listItem.addEventListener('click', () => {
+                        this.selectQuestion(index);
+                    });
+                    
+                    questionList.appendChild(listItem);
+                });
+            },
+            
+            // اختيار سؤال
+            selectQuestion: function(index) {
+                if (index === DataManager.currentQuestionIndex) return;
+                
+                DataManager.currentQuestionIndex = index;
+                this.updateQuestionList();
+                this.loadQuestion(index);
+            },
+            
+            // تحميل السؤال في المحرر
+            loadQuestion: function(index) {
+                if (index < 0 || index >= DataManager.quizData.length) return;
+                
+                const question = DataManager.quizData[index];
+                
+                // تحميل نص السؤال
+                this.elements.questionText.value = question.question.text || '';
+                
+                // تحميل صورة السؤال
+                if (question.question.image) {
+                    this.elements.questionImagePreview.innerHTML = `<img src="${question.question.image}" alt="صورة السؤال">`;
+                    this.elements.questionImagePreview.setAttribute('data-image-src', question.question.image);
+                } else {
+                    this.elements.questionImagePreview.innerHTML = '<p>لا توجد صورة</p>';
+                    this.elements.questionImagePreview.setAttribute('data-image-src', '');
+                }
+                
+                // تحميل الخيارات
+                this.loadOptions(question.options, question.correct);
+                
+                // تحديث المعاينة
+                this.updatePreview();
+            },
+            
+            // تحميل الخيارات
+            loadOptions: function(options, correctIndex) {
+                const optionsContainer = this.elements.optionsContainer;
+                optionsContainer.innerHTML = '';
+                
+                const optionLabels = ['أ', 'ب', 'ج', 'د'];
+                
+                options.forEach((option, index) => {
+                    const optionContainer = document.createElement('div');
+                    optionContainer.className = 'option-container';
+                    if (index === correctIndex) {
+                        optionContainer.classList.add('correct');
+                    }
+                    
+                    const optionHeader = document.createElement('div');
+                    optionHeader.className = 'option-header';
+                    
+                    const optionLabel = document.createElement('div');
+                    optionLabel.className = 'option-label';
+                    optionLabel.textContent = 'الخيار ' + optionLabels[index];
+                    
+                    const optionActions = document.createElement('div');
+                    optionActions.className = 'option-actions';
+                    
+                    const correctButton = document.createElement('button');
+                    correctButton.textContent = 'تعيين كإجابة صحيحة';
+                    correctButton.addEventListener('click', () => {
+                        this.setCorrectOption(index);
+                    });
+                    
+                    optionActions.appendChild(correctButton);
+                    optionHeader.appendChild(optionLabel);
+                    optionHeader.appendChild(optionActions);
+                    
+                    const optionTextGroup = document.createElement('div');
+                    optionTextGroup.className = 'form-group';
+                    
+                    const optionTextLabel = document.createElement('label');
+                    optionTextLabel.textContent = 'نص الخيار:';
+                    
+                    const optionTextInput = document.createElement('textarea');
+                    optionTextInput.className = 'option-text';
+                    optionTextInput.rows = 2;
+                    optionTextInput.value = option.text || '';
+                    
+                    optionTextGroup.appendChild(optionTextLabel);
+                    optionTextGroup.appendChild(optionTextInput);
+                    
+                    const imagePreview = document.createElement('div');
+                    imagePreview.className = 'image-preview';
+                    if (option.image) {
+                        imagePreview.innerHTML = `<img src="${option.image}" alt="صورة الخيار">`;
+                        imagePreview.setAttribute('data-image-src', option.image);
+                    } else {
+                        imagePreview.innerHTML = '<p>لا توجد صورة</p>';
+                        imagePreview.setAttribute('data-image-src', '');
+                    }
+                    
+                    const imageUploadContainer = document.createElement('div');
+                    imageUploadContainer.className = 'image-upload-container';
+                    
+                    const radioGroup = document.createElement('div');
+                    radioGroup.className = 'radio-group';
+                    
+                    const uploadRadioLabel = document.createElement('label');
+                    uploadRadioLabel.className = 'radio-label';
+                    uploadRadioLabel.innerHTML = '<input type="radio" name="optionImageType' + index + '" value="upload" checked> رفع صورة';
+                    
+                    const urlRadioLabel = document.createElement('label');
+                    urlRadioLabel.className = 'radio-label';
+                    urlRadioLabel.innerHTML = '<input type="radio" name="optionImageType' + index + '" value="url"> رابط صورة';
+                    
+                    const noneRadioLabel = document.createElement('label');
+                    noneRadioLabel.className = 'radio-label';
+                    noneRadioLabel.innerHTML = '<input type="radio" name="optionImageType' + index + '" value="none"> بدون صورة';
+                    
+                    radioGroup.appendChild(uploadRadioLabel);
+                    radioGroup.appendChild(urlRadioLabel);
+                    radioGroup.appendChild(noneRadioLabel);
+                    
+                    const fileInputContainer = document.createElement('div');
+                    fileInputContainer.className = 'file-input-container';
+                    fileInputContainer.id = 'optionImageUpload' + index;
+                    
+                    const fileInputButton = document.createElement('div');
+                    fileInputButton.className = 'file-input-button';
+                    fileInputButton.textContent = 'اختر صورة';
+                    
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.id = 'optionImageFile' + index;
+                    fileInput.accept = 'image/*';
+                    
+                    const fileName = document.createElement('div');
+                    fileName.className = 'file-name';
+                    fileName.id = 'optionImageFileName' + index;
+                    
+                    fileInputContainer.appendChild(fileInputButton);
+                    fileInputContainer.appendChild(fileInput);
+                    fileInputContainer.appendChild(fileName);
+                    
+                    const imageUrlContainer = document.createElement('div');
+                    imageUrlContainer.className = 'image-url-input';
+                    imageUrlContainer.id = 'optionImageUrl' + index;
+                    imageUrlContainer.style.display = 'none';
+                    
+                    const urlInput = document.createElement('input');
+                    urlInput.type = 'text';
+                    urlInput.id = 'optionImageUrlInput' + index;
+                    urlInput.placeholder = 'أدخل رابط الصورة';
+                    
+                    const urlButton = document.createElement('button');
+                    urlButton.id = 'optionImageUrlButton' + index;
+                    urlButton.textContent = 'تحميل الصورة';
+                    
+                    imageUrlContainer.appendChild(urlInput);
+                    imageUrlContainer.appendChild(urlButton);
+                    
+                    imageUploadContainer.appendChild(radioGroup);
+                    imageUploadContainer.appendChild(fileInputContainer);
+                    imageUploadContainer.appendChild(imageUrlContainer);
+                    
+                    optionContainer.appendChild(optionHeader);
+                    optionContainer.appendChild(optionTextGroup);
+                    optionContainer.appendChild(imagePreview);
+                    optionContainer.appendChild(imageUploadContainer);
+                    
+                    optionsContainer.appendChild(optionContainer);
+                    
+                    // إضافة مستمعي الأحداث
+                    fileInput.addEventListener('change', (e) => {
+                        if (e.target.files.length > 0) {
+                            const file = e.target.files[0];
+                            fileName.textContent = file.name;
+                            this.loadImageFromFile(file, imagePreview);
+                        } else {
+                            fileName.textContent = '';
+                        }
+                    });
+                    
+                    urlButton.addEventListener('click', () => {
+                        const url = urlInput.value.trim();
+                        if (url) {
+                            this.loadImageFromUrl(url, imagePreview);
+                        }
+                    });
+                    
+                    // مستمعي أحداث نوع الصورة
+                    const optionImageTypeRadios = document.querySelectorAll(`input[name="optionImageType${index}"]`);
+                    optionImageTypeRadios.forEach(radio => {
+                        radio.addEventListener('change', () => {
+                            const value = radio.value;
+                            if (value === 'upload') {
+                                fileInputContainer.style.display = 'block';
+                                imageUrlContainer.style.display = 'none';
+                            } else if (value === 'url') {
+                                fileInputContainer.style.display = 'none';
+                                imageUrlContainer.style.display = 'block';
+                            } else {
+                                fileInputContainer.style.display = 'none';
+                                imageUrlContainer.style.display = 'none';
+                                imagePreview.innerHTML = '<p>لا توجد صورة</p>';
+                                imagePreview.setAttribute('data-image-src', '');
+                            }
+                        });
+                    });
+                });
+            },
+            
+            // تعيين الخيار الصحيح
+            setCorrectOption: function(index) {
+                const optionContainers = this.elements.optionsContainer.querySelectorAll('.option-container');
+                
+                optionContainers.forEach((container, i) => {
+                    if (i === index) {
+                        container.classList.add('correct');
+                    } else {
+                        container.classList.remove('correct');
+                    }
+                });
+            },
+            
+            // تحميل صورة من ملف
+            loadImageFromFile: function(file, previewElement) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const imageSrc = e.target.result;
+                    previewElement.innerHTML = `<img src="${imageSrc}" alt="صورة">`;
+                    previewElement.setAttribute('data-image-src', imageSrc);
+                };
+                
+                reader.onerror = function() {
+                    UI.showError('حدث خطأ أثناء قراءة الملف');
+                };
+                
+                reader.readAsDataURL(file);
+            },
+            
+            // تحميل صورة من رابط
+            loadImageFromUrl: function(url, previewElement) {
+                const img = new Image();
+                
+                img.onload = function() {
+                    previewElement.innerHTML = `<img src="${url}" alt="صورة">`;
+                    previewElement.setAttribute('data-image-src', url);
+                };
+                
+                img.onerror = function() {
+                    UI.showError('تعذر تحميل الصورة من الرابط المحدد');
+                };
+                
+                img.src = url;
+            },
+            
+            // تحديث المعاينة
+            updatePreview: function() {
+                if (DataManager.currentQuestionIndex === -1) return;
+                
+                try {
+                    const question = DataManager.quizData[DataManager.currentQuestionIndex];
+                    const previewContainer = this.elements.previewContainer;
+                    
+                    previewContainer.innerHTML = '';
+                    
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'preview-question';
+                    
+                    const questionText = document.createElement('div');
+                    questionText.className = 'preview-question-text';
+                    questionText.textContent = question.question.text || 'سؤال بدون نص';
+                    
+                    questionDiv.appendChild(questionText);
+                    
+                    // إضافة صورة السؤال إذا كانت موجودة
+                    if (question.question.image) {
+                        const questionImage = document.createElement('img');
+                        questionImage.src = question.question.image;
+                        questionImage.alt = 'صورة السؤال';
+                        questionImage.style.maxWidth = '100%';
+                        questionImage.style.marginTop = '10px';
+                        questionDiv.appendChild(questionImage);
+                    }
+                    
+                    previewContainer.appendChild(questionDiv);
+                    
+                    // إضافة الخيارات
+                    const optionsList = document.createElement('ul');
+                    optionsList.className = 'preview-options';
+                    
+                    const optionLabels = ['أ', 'ب', 'ج', 'د'];
+                    
+                    question.options.forEach((option, index) => {
+                        const optionItem = document.createElement('li');
+                        optionItem.className = 'preview-option';
+                        if (index === question.correct) {
+                            optionItem.classList.add('correct');
+                        }
+                        
+                        optionItem.textContent = `${optionLabels[index]}) ${option.text || 'خيار بدون نص'}`;
+                        
+                        // إضافة صورة الخيار إذا كانت موجودة
+                        if (option.image) {
+                            const optionImage = document.createElement('img');
+                            optionImage.src = option.image;
+                            optionImage.alt = 'صورة الخيار';
+                            optionImage.style.maxWidth = '100%';
+                            optionImage.style.marginTop = '5px';
+                            optionItem.appendChild(optionImage);
+                        }
+                        
+                        optionsList.appendChild(optionItem);
+                    });
+                    
+                    previewContainer.appendChild(optionsList);
+                } catch (error) {
+                    console.error('Error updating preview:', error);
+                    this.showError('حدث خطأ أثناء تحديث المعاينة');
+                }
+            },
+            
+            // إعادة تعيين المحرر
+            resetEditor: function() {
+                this.elements.questionText.value = '';
+                this.elements.questionImagePreview.innerHTML = '<p>لا توجد صورة</p>';
+                this.elements.questionImagePreview.setAttribute('data-image-src', '');
+                this.elements.optionsContainer.innerHTML = '';
+                this.elements.previewContainer.innerHTML = '';
+            },
+            
+            // تبديل التبويبات
+            switchTab: function(tabName) {
+                // تحديث التبويبات
+                this.elements.editorTabs.forEach(tab => {
+                    if (tab.getAttribute('data-tab') === tabName) {
+                        tab.classList.add('active');
+                    } else {
+                        tab.classList.remove('active');
+                    }
+                });
+                
+                // تحديث محتوى التبويبات
+                const tabContents = document.querySelectorAll('.editor-content');
+                tabContents.forEach(content => {
+                    if (content.id === `${tabName}Tab`) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+                
+                // تحديث المعاينة إذا تم التبديل إلى تبويب المعاينة
+                if (tabName === 'preview') {
+                    this.updatePreview();
+                }
+            },
+            
+            // عرض رسالة نجاح
+            showSuccess: function(message) {
+                this.elements.successMessage.textContent = message;
+                this.elements.successMessage.style.display = 'block';
+                this.elements.errorMessage.style.display = 'none';
+                
+                setTimeout(() => {
+                    this.elements.successMessage.style.display = 'none';
+                }, 3000);
+            },
+            
+            // عرض رسالة خطأ
+            showError: function(message) {
+                this.elements.errorMessage.textContent = message;
+                this.elements.errorMessage.style.display = 'block';
+                this.elements.successMessage.style.display = 'none';
+                
+                setTimeout(() => {
+                    this.elements.errorMessage.style.display = 'none';
+                }, 5000);
+            },
+            
+            // عرض مؤشر التحميل
+            showLoading: function(show) {
+                this.elements.loadingIndicator.style.display = show ? 'block' : 'none';
+            },
+            
+            // عرض رسالة عدم وجود أسئلة
+            showNoQuestionsMessage: function(show) {
+                this.elements.noQuestionsMessage.style.display = show ? 'block' : 'none';
+            },
+            
+            // عرض نافذة الاستيراد
+            showImportModal: function() {
+                this.elements.importModal.style.display = 'block';
+            },
+            
+            // إخفاء نافذة الاستيراد
+            hideImportModal: function() {
+                this.elements.importModal.style.display = 'none';
+                this.elements.importJsonFile.value = '';
+                this.elements.importJsonFileName.textContent = '';
+            },
+            
+            // عرض نافذة الدمج
+            showMergeModal: function() {
+                this.elements.mergeModal.style.display = 'block';
+            },
+            
+            // إخفاء نافذة الدمج
+            hideMergeModal: function() {
+                this.elements.mergeModal.style.display = 'none';
+                this.elements.mergeJsonFile.value = '';
+                this.elements.mergeJsonFileName.textContent = '';
+            },
+            
+            // عرض نافذة تأكيد الحذف
+            showDeleteModal: function() {
+                this.elements.deleteModal.style.display = 'block';
+            },
+            
+            // إخفاء نافذة تأكيد الحذف
+            hideDeleteModal: function() {
+                this.elements.deleteModal.style.display = 'none';
+            },
+            
+            // استيراد من ملف JSON
+            importFromJson: function() {
+                const fileInput = this.elements.importJsonFile;
+                
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    this.showError('الرجاء اختيار ملف JSON');
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    const importType = document.querySelector('input[name="importType"]:checked').value;
+                    const success = DataManager.importData(e.target.result, importType);
+                    
+                    if (success) {
+                        this.hideImportModal();
+                        this.showSuccess('تم استيراد البيانات بنجاح');
+                    }
+                };
+                
+                reader.onerror = () => {
+                    this.showError('حدث خطأ أثناء قراءة الملف');
+                };
+                
+                reader.readAsText(file);
+            },
+            
+            // دمج من ملف JSON
+            mergeFromJson: function() {
+                const fileInput = this.elements.mergeJsonFile;
+                
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    this.showError('الرجاء اختيار ملف JSON');
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    const success = DataManager.importData(e.target.result, 'append');
+                    
+                    if (success) {
+                        this.hideMergeModal();
+                        this.showSuccess('تم دمج البيانات بنجاح');
+                    }
+                };
+                
+                reader.onerror = () => {
+                    this.showError('حدث خطأ أثناء قراءة الملف');
+                };
+                
+                reader.readAsText(file);
+            },
+            
+            // تصدير إلى ملف JSON
+            exportToJson: function() {
+                if (DataManager.quizData.length === 0) {
+                    this.showError('لا توجد بيانات للتصدير');
+                    return;
+                }
+                
+                const jsonData = DataManager.exportData();
+                
+                if (!jsonData) {
+                    return;
+                }
+                
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'quiz_data.json';
+                document.body.appendChild(a);
+                a.click();
+                
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 0);
+                
+                this.showSuccess('تم تصدير البيانات بنجاح');
+            }
+        };
+        
+        // تهيئة التطبيق عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            UI.init();
+        });
+    </script>
+</body>
+</html>
