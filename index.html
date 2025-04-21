@@ -285,6 +285,14 @@
             background-color: #c0392b;
         }
         
+        .new-file-button {
+            background-color: #1abc9c;
+        }
+        
+        .new-file-button:hover {
+            background-color: #16a085;
+        }
+        
         .import-export {
             margin-top: 20px;
             padding: 20px;
@@ -304,7 +312,7 @@
             gap: 10px;
         }
         
-        .import-button, .export-button, .merge-button {
+        .import-button, .export-button, .merge-button, .new-file-button {
             flex: 1;
         }
         
@@ -619,6 +627,9 @@
                 <div class="import-export">
                     <div class="import-export-title">استيراد / تصدير</div>
                     <div class="import-export-buttons">
+                        <div class="new-file-button">
+                            <button id="newFileButton" class="new-file-button">ملف جديد</button>
+                        </div>
                         <div class="import-button">
                             <button id="importButton">استيراد ملف JSON</button>
                         </div>
@@ -705,6 +716,23 @@
             <div class="modal-footer">
                 <button id="confirmDeleteButton" class="delete-button">حذف</button>
                 <button id="cancelDeleteButton">إلغاء</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for confirming new file -->
+    <div class="modal" id="newFileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">تأكيد إنشاء ملف جديد</div>
+                <span class="close-button" id="closeNewFileModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>هل أنت متأكد من إنشاء ملف جديد؟ سيتم مسح جميع البيانات الحالية.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmNewFileButton" class="new-file-button">إنشاء ملف جديد</button>
+                <button id="cancelNewFileButton">إلغاء</button>
             </div>
         </div>
     </div>
@@ -849,6 +877,19 @@
                 } catch (error) {
                     console.error('Error saving to localStorage:', error);
                 }
+            },
+            
+            // إنشاء ملف جديد
+            createNewFile: function() {
+                this.quizData = [];
+                this.currentQuestionIndex = -1;
+                
+                // مسح البيانات من localStorage
+                localStorage.removeItem('quizData');
+                
+                UI.updateQuestionList();
+                UI.resetEditor();
+                UI.showSuccess('تم إنشاء ملف جديد بنجاح');
             },
             
             // استيراد بيانات من ملف JSON
@@ -1018,6 +1059,7 @@
                 saveQuestionButton: document.getElementById('saveQuestionButton'),
                 duplicateQuestionButton: document.getElementById('duplicateQuestionButton'),
                 deleteQuestionButton: document.getElementById('deleteQuestionButton'),
+                newFileButton: document.getElementById('newFileButton'),
                 importButton: document.getElementById('importButton'),
                 exportButton: document.getElementById('exportButton'),
                 mergeButton: document.getElementById('mergeButton'),
@@ -1037,6 +1079,10 @@
                 closeDeleteModal: document.getElementById('closeDeleteModal'),
                 confirmDeleteButton: document.getElementById('confirmDeleteButton'),
                 cancelDeleteButton: document.getElementById('cancelDeleteButton'),
+                newFileModal: document.getElementById('newFileModal'),
+                closeNewFileModal: document.getElementById('closeNewFileModal'),
+                confirmNewFileButton: document.getElementById('confirmNewFileButton'),
+                cancelNewFileButton: document.getElementById('cancelNewFileButton'),
                 editorTabs: document.querySelectorAll('.editor-tab')
             },
             
@@ -1075,6 +1121,10 @@
                 
                 this.elements.deleteQuestionButton.addEventListener('click', () => {
                     this.showDeleteModal();
+                });
+                
+                this.elements.newFileButton.addEventListener('click', () => {
+                    this.showNewFileModal();
                 });
                 
                 // أزرار الاستيراد والتصدير
@@ -1126,6 +1176,19 @@
                 this.elements.confirmDeleteButton.addEventListener('click', () => {
                     DataManager.deleteCurrentQuestion();
                     this.hideDeleteModal();
+                });
+                
+                this.elements.closeNewFileModal.addEventListener('click', () => {
+                    this.hideNewFileModal();
+                });
+                
+                this.elements.cancelNewFileButton.addEventListener('click', () => {
+                    this.hideNewFileModal();
+                });
+                
+                this.elements.confirmNewFileButton.addEventListener('click', () => {
+                    DataManager.createNewFile();
+                    this.hideNewFileModal();
                 });
                 
                 // مستمعي أحداث ملفات الاستيراد
@@ -1595,9 +1658,10 @@
                 this.elements.successMessage.style.display = 'block';
                 this.elements.errorMessage.style.display = 'none';
                 
+                // زيادة مدة ظهور رسالة النجاح إلى 5 ثوانٍ بدلاً من 3
                 setTimeout(() => {
                     this.elements.successMessage.style.display = 'none';
-                }, 3000);
+                }, 5000);
             },
             
             // عرض رسالة خطأ
@@ -1653,6 +1717,16 @@
             // إخفاء نافذة تأكيد الحذف
             hideDeleteModal: function() {
                 this.elements.deleteModal.style.display = 'none';
+            },
+            
+            // عرض نافذة تأكيد إنشاء ملف جديد
+            showNewFileModal: function() {
+                this.elements.newFileModal.style.display = 'block';
+            },
+            
+            // إخفاء نافذة تأكيد إنشاء ملف جديد
+            hideNewFileModal: function() {
+                this.elements.newFileModal.style.display = 'none';
             },
             
             // استيراد من ملف JSON
