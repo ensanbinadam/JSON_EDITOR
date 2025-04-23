@@ -129,6 +129,7 @@
             border-bottom: 1px solid #eee;
             cursor: pointer;
             transition: background-color 0.2s;
+            position: relative;
         }
         
         .question-item:hover {
@@ -138,6 +139,12 @@
         .question-item.active {
             background-color: #e3f2fd;
             border-right: 3px solid #3498db;
+        }
+        
+        .question-item-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         .question-number {
@@ -499,6 +506,145 @@
             margin: 0 auto;
         }
         
+        /* زر ترتيب الأسئلة */
+        .reorder-questions-button {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .reorder-questions-button:hover {
+            background-color: #e67e22;
+        }
+        
+        .reorder-questions-button i {
+            margin-left: 8px;
+        }
+        
+        /* نافذة ترتيب الأسئلة */
+        .reorder-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+        
+        .reorder-modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .reorder-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .reorder-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: move;
+            transition: background-color 0.2s, transform 0.2s;
+            user-select: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .reorder-item:hover {
+            background-color: #e9ecef;
+        }
+        
+        .reorder-item.dragging {
+            opacity: 0.5;
+            background-color: #e3f2fd;
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .reorder-item-content {
+            flex: 1;
+        }
+        
+        .reorder-item-number {
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+        
+        .reorder-item-text {
+            color: #333;
+        }
+        
+        .reorder-handle {
+            margin-left: 15px;
+            color: #95a5a6;
+            font-size: 20px;
+            cursor: move;
+        }
+        
+        .reorder-instructions {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-right: 4px solid #3498db;
+        }
+        
+        .reorder-instructions h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .reorder-instructions p {
+            margin-bottom: 0;
+            color: #7f8c8d;
+        }
+        
+        .reorder-modal-footer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .save-reorder-button {
+            background-color: #2ecc71;
+        }
+        
+        .save-reorder-button:hover {
+            background-color: #27ae60;
+        }
+        
+        .cancel-reorder-button {
+            background-color: #e74c3c;
+        }
+        
+        .cancel-reorder-button:hover {
+            background-color: #c0392b;
+        }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -512,6 +658,11 @@
             .sidebar {
                 width: 100%;
                 max-height: 300px;
+            }
+            
+            .reorder-modal-content {
+                width: 95%;
+                margin: 10% auto;
             }
         }
         
@@ -541,6 +692,9 @@
             <div class="sidebar">
                 <div class="form-group">
                     <button id="addQuestionButton" class="add-button">إضافة سؤال جديد</button>
+                    <button id="reorderQuestionsButton" class="reorder-questions-button">
+                        <i>&#8597;</i> ترتيب الأسئلة
+                    </button>
                 </div>
                 
                 <div id="questionListContainer">
@@ -736,6 +890,27 @@
             </div>
         </div>
     </div>
+    
+    <!-- Modal for reordering questions -->
+    <div class="reorder-modal" id="reorderModal">
+        <div class="reorder-modal-content">
+            <div class="modal-header">
+                <div class="modal-title">ترتيب الأسئلة</div>
+                <span class="close-button" id="closeReorderModal">&times;</span>
+            </div>
+            <div class="reorder-instructions">
+                <h3>تعليمات الترتيب</h3>
+                <p>اسحب وأفلت الأسئلة لإعادة ترتيبها. يمكنك سحب السؤال من أي مكان أو من أيقونة السحب (≡).</p>
+            </div>
+            <div class="modal-body">
+                <ul class="reorder-list" id="reorderList"></ul>
+            </div>
+            <div class="reorder-modal-footer">
+                <button id="saveReorderButton" class="save-reorder-button">حفظ الترتيب</button>
+                <button id="cancelReorderButton" class="cancel-reorder-button">إلغاء</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // تحويل الأرقام العربية إلى الأرقام الهندية
@@ -870,65 +1045,52 @@
                 }
             },
             
+            // إنشاء ملف جديد
+            createNewFile: function() {
+                this.init();
+                UI.showSuccess('تم إنشاء ملف جديد');
+                
+                // حفظ البيانات في localStorage
+                this.saveToLocalStorage();
+            },
+            
             // حفظ البيانات في localStorage
             saveToLocalStorage: function() {
                 try {
                     localStorage.setItem('quizData', JSON.stringify(this.quizData));
                 } catch (error) {
                     console.error('Error saving to localStorage:', error);
+                    UI.showError('حدث خطأ أثناء حفظ البيانات: ' + error.message);
                 }
             },
             
-            // إنشاء ملف جديد
-            createNewFile: function() {
-                this.quizData = [];
-                this.currentQuestionIndex = -1;
-                
-                // مسح البيانات من localStorage
-                localStorage.removeItem('quizData');
-                
-                UI.updateQuestionList();
-                UI.resetEditor();
-                UI.showSuccess('تم إنشاء ملف جديد بنجاح');
-            },
-            
-            // استيراد بيانات من ملف JSON
-            importData: function(jsonData, importType) {
+            // استيراد البيانات من نص JSON
+            importData: function(jsonText, importType = 'replace') {
                 try {
-                    let data;
-                    try {
-                        data = JSON.parse(jsonData);
-                    } catch (e) {
-                        throw new Error('تنسيق JSON غير صالح. تأكد من أن الملف يحتوي على بيانات JSON صحيحة.');
+                    const importedData = JSON.parse(jsonText);
+                    
+                    if (!Array.isArray(importedData)) {
+                        UI.showError('تنسيق البيانات غير صالح. يجب أن تكون البيانات مصفوفة من الأسئلة.');
+                        return false;
                     }
                     
-                    if (!Array.isArray(data)) {
-                        throw new Error('تنسيق البيانات غير صحيح. يجب أن تكون البيانات مصفوفة من الأسئلة.');
-                    }
+                    const validData = importedData.map(item => this.validateQuestionItem(item)).filter(Boolean);
                     
-                    // التحقق من صحة البيانات
-                    const validatedData = [];
-                    for (const item of data) {
-                        // إذا كان العنصر لا يحتوي على الحقول المطلوبة، نحاول إصلاحه
-                        const validItem = this.validateAndFixQuestionItem(item);
-                        validatedData.push(validItem);
+                    if (validData.length === 0) {
+                        UI.showError('لم يتم العثور على أسئلة صالحة في الملف المستورد.');
+                        return false;
                     }
                     
                     if (importType === 'replace') {
-                        this.quizData = validatedData;
+                        this.quizData = validData;
                     } else {
-                        this.quizData = this.quizData.concat(validatedData);
+                        this.quizData = this.quizData.concat(validData);
                     }
                     
-                    this.currentQuestionIndex = this.quizData.length > 0 ? 0 : -1;
+                    this.currentQuestionIndex = 0;
                     
                     UI.updateQuestionList();
-                    
-                    if (this.currentQuestionIndex !== -1) {
-                        UI.loadQuestion(this.currentQuestionIndex);
-                    } else {
-                        UI.resetEditor();
-                    }
+                    UI.loadQuestion(this.currentQuestionIndex);
                     
                     // حفظ البيانات في localStorage
                     this.saveToLocalStorage();
@@ -941,8 +1103,10 @@
                 }
             },
             
-            // التحقق من صحة عنصر السؤال وإصلاحه إذا لزم الأمر
-            validateAndFixQuestionItem: function(item) {
+            // التحقق من صحة عنصر السؤال
+            validateQuestionItem: function(item) {
+                if (!item || typeof item !== 'object') return null;
+                
                 const validItem = {
                     question: {
                         text: '',
@@ -957,7 +1121,7 @@
                     correct: 0
                 };
                 
-                // نسخ بيانات السؤال إذا كانت موجودة
+                // التحقق من السؤال
                 if (item.question) {
                     if (typeof item.question === 'object') {
                         validItem.question.text = item.question.text || '';
@@ -966,38 +1130,46 @@
                         validItem.question.text = item.question;
                     }
                 } else if (item.text) {
-                    // بعض التنسيقات قد تستخدم "text" بدلاً من "question"
                     validItem.question.text = item.text;
-                    if (item.image) {
-                        validItem.question.image = item.image;
-                    }
                 }
                 
-                // نسخ بيانات الخيارات إذا كانت موجودة
-                if (Array.isArray(item.options)) {
-                    for (let i = 0; i < Math.min(item.options.length, 4); i++) {
-                        const option = item.options[i];
+                // التحقق من الخيارات
+                if (Array.isArray(item.options) && item.options.length > 0) {
+                    const validOptions = [];
+                    
+                    item.options.forEach((option, index) => {
+                        if (index >= 4) return; // الحد الأقصى 4 خيارات
+                        
                         if (typeof option === 'object') {
-                            validItem.options[i].text = option.text || '';
-                            validItem.options[i].image = option.image || null;
+                            validOptions.push({
+                                text: option.text || '',
+                                image: option.image || null
+                            });
                         } else if (typeof option === 'string') {
-                            validItem.options[i].text = option;
+                            validOptions.push({
+                                text: option,
+                                image: null
+                            });
+                        } else {
+                            validOptions.push({
+                                text: '',
+                                image: null
+                            });
                         }
+                    });
+                    
+                    // إضافة خيارات فارغة إذا كان عدد الخيارات أقل من 4
+                    while (validOptions.length < 4) {
+                        validOptions.push({
+                            text: '',
+                            image: null
+                        });
                     }
-                } else if (Array.isArray(item.choices)) {
-                    // بعض التنسيقات قد تستخدم "choices" بدلاً من "options"
-                    for (let i = 0; i < Math.min(item.choices.length, 4); i++) {
-                        const choice = item.choices[i];
-                        if (typeof choice === 'object') {
-                            validItem.options[i].text = choice.text || '';
-                            validItem.options[i].image = choice.image || null;
-                        } else if (typeof choice === 'string') {
-                            validItem.options[i].text = choice;
-                        }
-                    }
+                    
+                    validItem.options = validOptions;
                 }
                 
-                // نسخ الإجابة الصحيحة إذا كانت موجودة
+                // التحقق من الإجابة الصحيحة
                 if (typeof item.correct === 'number' && item.correct >= 0 && item.correct < 4) {
                     validItem.correct = item.correct;
                 } else if (typeof item.answer === 'number' && item.answer >= 0 && item.answer < 4) {
@@ -1031,6 +1203,56 @@
                     console.error('Error loading from localStorage:', error);
                     return false;
                 }
+            },
+            
+            // إعادة ترتيب الأسئلة
+            reorderQuestions: function(newOrder) {
+                try {
+                    // التحقق من صحة الترتيب الجديد
+                    if (!Array.isArray(newOrder) || newOrder.length !== this.quizData.length) {
+                        UI.showError('ترتيب الأسئلة غير صالح');
+                        return false;
+                    }
+                    
+                    // إنشاء نسخة مؤقتة من البيانات
+                    const tempData = [];
+                    
+                    // إعادة ترتيب البيانات وفقًا للترتيب الجديد
+                    for (let i = 0; i < newOrder.length; i++) {
+                        const oldIndex = newOrder[i];
+                        if (oldIndex < 0 || oldIndex >= this.quizData.length) {
+                            UI.showError('ترتيب الأسئلة غير صالح');
+                            return false;
+                        }
+                        tempData.push(this.quizData[oldIndex]);
+                    }
+                    
+                    // تحديث البيانات بالترتيب الجديد
+                    this.quizData = tempData;
+                    
+                    // تحديث المؤشر الحالي إذا كان هناك سؤال محدد
+                    if (this.currentQuestionIndex !== -1) {
+                        this.currentQuestionIndex = newOrder.indexOf(this.currentQuestionIndex);
+                        if (this.currentQuestionIndex === -1) {
+                            this.currentQuestionIndex = 0;
+                        }
+                    }
+                    
+                    // تحديث واجهة المستخدم
+                    UI.updateQuestionList();
+                    if (this.currentQuestionIndex !== -1) {
+                        UI.loadQuestion(this.currentQuestionIndex);
+                    }
+                    
+                    // حفظ البيانات في localStorage
+                    this.saveToLocalStorage();
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Error reordering questions:', error);
+                    UI.showError('حدث خطأ أثناء إعادة ترتيب الأسئلة: ' + error.message);
+                    return false;
+                }
             }
         };
         
@@ -1056,6 +1278,7 @@
                 successMessage: document.getElementById('successMessage'),
                 errorMessage: document.getElementById('errorMessage'),
                 addQuestionButton: document.getElementById('addQuestionButton'),
+                reorderQuestionsButton: document.getElementById('reorderQuestionsButton'),
                 saveQuestionButton: document.getElementById('saveQuestionButton'),
                 duplicateQuestionButton: document.getElementById('duplicateQuestionButton'),
                 deleteQuestionButton: document.getElementById('deleteQuestionButton'),
@@ -1083,6 +1306,11 @@
                 closeNewFileModal: document.getElementById('closeNewFileModal'),
                 confirmNewFileButton: document.getElementById('confirmNewFileButton'),
                 cancelNewFileButton: document.getElementById('cancelNewFileButton'),
+                reorderModal: document.getElementById('reorderModal'),
+                closeReorderModal: document.getElementById('closeReorderModal'),
+                reorderList: document.getElementById('reorderList'),
+                saveReorderButton: document.getElementById('saveReorderButton'),
+                cancelReorderButton: document.getElementById('cancelReorderButton'),
                 editorTabs: document.querySelectorAll('.editor-tab')
             },
             
@@ -1109,6 +1337,10 @@
                 // أزرار الإجراءات الرئيسية
                 this.elements.addQuestionButton.addEventListener('click', () => {
                     DataManager.addNewQuestion();
+                });
+                
+                this.elements.reorderQuestionsButton.addEventListener('click', () => {
+                    this.showReorderModal();
                 });
                 
                 this.elements.saveQuestionButton.addEventListener('click', () => {
@@ -1191,6 +1423,19 @@
                     this.hideNewFileModal();
                 });
                 
+                // مستمعي أحداث نافذة إعادة الترتيب
+                this.elements.closeReorderModal.addEventListener('click', () => {
+                    this.hideReorderModal();
+                });
+                
+                this.elements.cancelReorderButton.addEventListener('click', () => {
+                    this.hideReorderModal();
+                });
+                
+                this.elements.saveReorderButton.addEventListener('click', () => {
+                    this.saveReorderedQuestions();
+                });
+                
                 // مستمعي أحداث ملفات الاستيراد
                 this.elements.importJsonFile.addEventListener('change', (e) => {
                     if (e.target.files.length > 0) {
@@ -1269,9 +1514,17 @@
                 DataManager.quizData.forEach((question, index) => {
                     const listItem = document.createElement('li');
                     listItem.className = 'question-item';
+                    listItem.setAttribute('data-index', index);
+                    
                     if (index === DataManager.currentQuestionIndex) {
                         listItem.classList.add('active');
                     }
+                    
+                    const itemContent = document.createElement('div');
+                    itemContent.className = 'question-item-content';
+                    
+                    const questionInfo = document.createElement('div');
+                    questionInfo.style.flex = '1';
                     
                     const questionNumber = document.createElement('div');
                     questionNumber.className = 'question-number';
@@ -1290,10 +1543,14 @@
                         questionNumber.prepend(thumbnail);
                     }
                     
-                    listItem.appendChild(questionNumber);
-                    listItem.appendChild(questionText);
+                    questionInfo.appendChild(questionNumber);
+                    questionInfo.appendChild(questionText);
                     
-                    listItem.addEventListener('click', () => {
+                    itemContent.appendChild(questionInfo);
+                    listItem.appendChild(itemContent);
+                    
+                    // إضافة مستمع حدث النقر لاختيار السؤال
+                    questionInfo.addEventListener('click', () => {
                         this.selectQuestion(index);
                     });
                     
@@ -1354,37 +1611,33 @@
                     
                     const optionLabel = document.createElement('div');
                     optionLabel.className = 'option-label';
-                    optionLabel.textContent = 'الخيار ' + optionLabels[index];
+                    optionLabel.textContent = `الخيار ${optionLabels[index]}:`;
                     
                     const optionActions = document.createElement('div');
                     optionActions.className = 'option-actions';
                     
                     const correctButton = document.createElement('button');
+                    correctButton.type = 'button';
                     correctButton.textContent = 'تعيين كإجابة صحيحة';
+                    correctButton.style.backgroundColor = index === correctIndex ? '#28a745' : '#6c757d';
+                    
                     correctButton.addEventListener('click', () => {
                         this.setCorrectOption(index);
                     });
                     
                     optionActions.appendChild(correctButton);
+                    
                     optionHeader.appendChild(optionLabel);
                     optionHeader.appendChild(optionActions);
                     
-                    const optionTextGroup = document.createElement('div');
-                    optionTextGroup.className = 'form-group';
-                    
-                    const optionTextLabel = document.createElement('label');
-                    optionTextLabel.textContent = 'نص الخيار:';
-                    
-                    const optionTextInput = document.createElement('textarea');
-                    optionTextInput.className = 'option-text';
-                    optionTextInput.rows = 2;
-                    optionTextInput.value = option.text || '';
-                    
-                    optionTextGroup.appendChild(optionTextLabel);
-                    optionTextGroup.appendChild(optionTextInput);
+                    const textInput = document.createElement('textarea');
+                    textInput.className = 'option-text';
+                    textInput.rows = 2;
+                    textInput.value = option.text || '';
                     
                     const imagePreview = document.createElement('div');
                     imagePreview.className = 'image-preview';
+                    
                     if (option.image) {
                         imagePreview.innerHTML = `<img src="${option.image}" alt="صورة الخيار">`;
                         imagePreview.setAttribute('data-image-src', option.image);
@@ -1399,21 +1652,21 @@
                     const radioGroup = document.createElement('div');
                     radioGroup.className = 'radio-group';
                     
-                    const uploadRadioLabel = document.createElement('label');
-                    uploadRadioLabel.className = 'radio-label';
-                    uploadRadioLabel.innerHTML = '<input type="radio" name="optionImageType' + index + '" value="upload" checked> رفع صورة';
+                    const uploadLabel = document.createElement('label');
+                    uploadLabel.className = 'radio-label';
+                    uploadLabel.innerHTML = '<input type="radio" name="optionImageType' + index + '" value="upload" checked> رفع صورة';
                     
-                    const urlRadioLabel = document.createElement('label');
-                    urlRadioLabel.className = 'radio-label';
-                    urlRadioLabel.innerHTML = '<input type="radio" name="optionImageType' + index + '" value="url"> رابط صورة';
+                    const urlLabel = document.createElement('label');
+                    urlLabel.className = 'radio-label';
+                    urlLabel.innerHTML = '<input type="radio" name="optionImageType' + index + '" value="url"> رابط صورة';
                     
-                    const noneRadioLabel = document.createElement('label');
-                    noneRadioLabel.className = 'radio-label';
-                    noneRadioLabel.innerHTML = '<input type="radio" name="optionImageType' + index + '" value="none"> بدون صورة';
+                    const noneLabel = document.createElement('label');
+                    noneLabel.className = 'radio-label';
+                    noneLabel.innerHTML = '<input type="radio" name="optionImageType' + index + '" value="none"> بدون صورة';
                     
-                    radioGroup.appendChild(uploadRadioLabel);
-                    radioGroup.appendChild(urlRadioLabel);
-                    radioGroup.appendChild(noneRadioLabel);
+                    radioGroup.appendChild(uploadLabel);
+                    radioGroup.appendChild(urlLabel);
+                    radioGroup.appendChild(noneLabel);
                     
                     const fileInputContainer = document.createElement('div');
                     fileInputContainer.className = 'file-input-container';
@@ -1425,8 +1678,8 @@
                     
                     const fileInput = document.createElement('input');
                     fileInput.type = 'file';
-                    fileInput.id = 'optionImageFile' + index;
                     fileInput.accept = 'image/*';
+                    fileInput.id = 'optionImageFile' + index;
                     
                     const fileName = document.createElement('div');
                     fileName.className = 'file-name';
@@ -1436,10 +1689,10 @@
                     fileInputContainer.appendChild(fileInput);
                     fileInputContainer.appendChild(fileName);
                     
-                    const imageUrlContainer = document.createElement('div');
-                    imageUrlContainer.className = 'image-url-input';
-                    imageUrlContainer.id = 'optionImageUrl' + index;
-                    imageUrlContainer.style.display = 'none';
+                    const urlInputContainer = document.createElement('div');
+                    urlInputContainer.className = 'image-url-input';
+                    urlInputContainer.id = 'optionImageUrl' + index;
+                    urlInputContainer.style.display = 'none';
                     
                     const urlInput = document.createElement('input');
                     urlInput.type = 'text';
@@ -1450,21 +1703,21 @@
                     urlButton.id = 'optionImageUrlButton' + index;
                     urlButton.textContent = 'تحميل الصورة';
                     
-                    imageUrlContainer.appendChild(urlInput);
-                    imageUrlContainer.appendChild(urlButton);
+                    urlInputContainer.appendChild(urlInput);
+                    urlInputContainer.appendChild(urlButton);
                     
                     imageUploadContainer.appendChild(radioGroup);
                     imageUploadContainer.appendChild(fileInputContainer);
-                    imageUploadContainer.appendChild(imageUrlContainer);
+                    imageUploadContainer.appendChild(urlInputContainer);
                     
                     optionContainer.appendChild(optionHeader);
-                    optionContainer.appendChild(optionTextGroup);
+                    optionContainer.appendChild(textInput);
                     optionContainer.appendChild(imagePreview);
                     optionContainer.appendChild(imageUploadContainer);
                     
                     optionsContainer.appendChild(optionContainer);
                     
-                    // إضافة مستمعي الأحداث
+                    // إضافة مستمعي الأحداث لعناصر الخيار
                     fileInput.addEventListener('change', (e) => {
                         if (e.target.files.length > 0) {
                             const file = e.target.files[0];
@@ -1482,20 +1735,20 @@
                         }
                     });
                     
-                    // مستمعي أحداث نوع الصورة
-                    const optionImageTypeRadios = document.querySelectorAll(`input[name="optionImageType${index}"]`);
+                    // مستمعي أحداث نوع صورة الخيار
+                    const optionImageTypeRadios = radioGroup.querySelectorAll('input[type="radio"]');
                     optionImageTypeRadios.forEach(radio => {
                         radio.addEventListener('change', () => {
                             const value = radio.value;
                             if (value === 'upload') {
                                 fileInputContainer.style.display = 'block';
-                                imageUrlContainer.style.display = 'none';
+                                urlInputContainer.style.display = 'none';
                             } else if (value === 'url') {
                                 fileInputContainer.style.display = 'none';
-                                imageUrlContainer.style.display = 'block';
+                                urlInputContainer.style.display = 'block';
                             } else {
                                 fileInputContainer.style.display = 'none';
-                                imageUrlContainer.style.display = 'none';
+                                urlInputContainer.style.display = 'none';
                                 imagePreview.innerHTML = '<p>لا توجد صورة</p>';
                                 imagePreview.setAttribute('data-image-src', '');
                             }
@@ -1555,61 +1808,84 @@
                 if (DataManager.currentQuestionIndex === -1) return;
                 
                 try {
-                    const question = DataManager.quizData[DataManager.currentQuestionIndex];
                     const previewContainer = this.elements.previewContainer;
-                    
                     previewContainer.innerHTML = '';
                     
-                    const questionDiv = document.createElement('div');
-                    questionDiv.className = 'preview-question';
+                    // إضافة عنوان للمعاينة
+                    const previewTitle = document.createElement('h3');
+                    previewTitle.textContent = 'معاينة الأسئلة';
+                    previewContainer.appendChild(previewTitle);
                     
-                    const questionText = document.createElement('div');
-                    questionText.className = 'preview-question-text';
-                    questionText.textContent = question.question.text || 'سؤال بدون نص';
-                    
-                    questionDiv.appendChild(questionText);
-                    
-                    // إضافة صورة السؤال إذا كانت موجودة
-                    if (question.question.image) {
-                        const questionImage = document.createElement('img');
-                        questionImage.src = question.question.image;
-                        questionImage.alt = 'صورة السؤال';
-                        questionImage.style.maxWidth = '100%';
-                        questionImage.style.marginTop = '10px';
-                        questionDiv.appendChild(questionImage);
-                    }
-                    
-                    previewContainer.appendChild(questionDiv);
-                    
-                    // إضافة الخيارات
-                    const optionsList = document.createElement('ul');
-                    optionsList.className = 'preview-options';
-                    
-                    const optionLabels = ['أ', 'ب', 'ج', 'د'];
-                    
-                    question.options.forEach((option, index) => {
-                        const optionItem = document.createElement('li');
-                        optionItem.className = 'preview-option';
-                        if (index === question.correct) {
-                            optionItem.classList.add('correct');
+                    // عرض جميع الأسئلة في المعاينة
+                    DataManager.quizData.forEach((question, index) => {
+                        const questionDiv = document.createElement('div');
+                        questionDiv.className = 'preview-question';
+                        questionDiv.setAttribute('data-index', index);
+                        
+                        // إضافة رأس السؤال
+                        const questionHeader = document.createElement('div');
+                        questionHeader.className = 'preview-question-header';
+                        
+                        const questionNumber = document.createElement('div');
+                        questionNumber.className = 'preview-question-number';
+                        questionNumber.textContent = 'سؤال ' + toArabicNumerals(index + 1);
+                        
+                        questionHeader.appendChild(questionNumber);
+                        questionDiv.appendChild(questionHeader);
+                        
+                        // إضافة نص السؤال
+                        const questionText = document.createElement('div');
+                        questionText.className = 'preview-question-text';
+                        questionText.textContent = question.question.text || 'سؤال بدون نص';
+                        questionDiv.appendChild(questionText);
+                        
+                        // إضافة صورة السؤال إذا كانت موجودة
+                        if (question.question.image) {
+                            const questionImage = document.createElement('img');
+                            questionImage.src = question.question.image;
+                            questionImage.alt = 'صورة السؤال';
+                            questionImage.style.maxWidth = '100%';
+                            questionImage.style.marginTop = '10px';
+                            questionDiv.appendChild(questionImage);
                         }
                         
-                        optionItem.textContent = `${optionLabels[index]}) ${option.text || 'خيار بدون نص'}`;
+                        // إضافة الخيارات
+                        const optionsList = document.createElement('ul');
+                        optionsList.className = 'preview-options';
                         
-                        // إضافة صورة الخيار إذا كانت موجودة
-                        if (option.image) {
-                            const optionImage = document.createElement('img');
-                            optionImage.src = option.image;
-                            optionImage.alt = 'صورة الخيار';
-                            optionImage.style.maxWidth = '100%';
-                            optionImage.style.marginTop = '5px';
-                            optionItem.appendChild(optionImage);
+                        const optionLabels = ['أ', 'ب', 'ج', 'د'];
+                        
+                        question.options.forEach((option, optionIndex) => {
+                            const optionItem = document.createElement('li');
+                            optionItem.className = 'preview-option';
+                            if (optionIndex === question.correct) {
+                                optionItem.classList.add('correct');
+                            }
+                            
+                            optionItem.textContent = `${optionLabels[optionIndex]}) ${option.text || 'خيار بدون نص'}`;
+                            
+                            // إضافة صورة الخيار إذا كانت موجودة
+                            if (option.image) {
+                                const optionImage = document.createElement('img');
+                                optionImage.src = option.image;
+                                optionImage.alt = 'صورة الخيار';
+                                optionImage.style.maxWidth = '100%';
+                                optionImage.style.marginTop = '5px';
+                                optionItem.appendChild(optionImage);
+                            }
+                            
+                            optionsList.appendChild(optionItem);
+                        });
+                        
+                        questionDiv.appendChild(optionsList);
+                        previewContainer.appendChild(questionDiv);
+                        
+                        // إضافة خط فاصل بين الأسئلة
+                        if (index < DataManager.quizData.length - 1) {
+                            const divider = document.createElement('hr');
+                            previewContainer.appendChild(divider);
                         }
-                        
-                        optionsList.appendChild(optionItem);
                     });
-                    
-                    previewContainer.appendChild(optionsList);
                 } catch (error) {
                     console.error('Error updating preview:', error);
                     this.showError('حدث خطأ أثناء تحديث المعاينة');
@@ -1727,6 +2003,332 @@
             // إخفاء نافذة تأكيد إنشاء ملف جديد
             hideNewFileModal: function() {
                 this.elements.newFileModal.style.display = 'none';
+            },
+            
+            // عرض نافذة إعادة ترتيب الأسئلة
+            showReorderModal: function() {
+                if (DataManager.quizData.length <= 1) {
+                    this.showError('يجب أن يكون هناك أكثر من سؤال واحد لإعادة الترتيب');
+                    return;
+                }
+                
+                // تحديث قائمة إعادة الترتيب
+                this.updateReorderList();
+                
+                // عرض النافذة
+                this.elements.reorderModal.style.display = 'block';
+                
+                // إعداد وظيفة السحب والإفلات
+                this.setupDragAndDrop();
+            },
+            
+            // إخفاء نافذة إعادة ترتيب الأسئلة
+            hideReorderModal: function() {
+                this.elements.reorderModal.style.display = 'none';
+            },
+            
+            // تحديث قائمة إعادة الترتيب
+            updateReorderList: function() {
+                const reorderList = this.elements.reorderList;
+                reorderList.innerHTML = '';
+                
+                DataManager.quizData.forEach((question, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'reorder-item';
+                    listItem.setAttribute('data-index', index);
+                    listItem.setAttribute('draggable', 'true');
+                    
+                    const itemContent = document.createElement('div');
+                    itemContent.className = 'reorder-item-content';
+                    
+                    const itemNumber = document.createElement('div');
+                    itemNumber.className = 'reorder-item-number';
+                    itemNumber.textContent = 'سؤال ' + toArabicNumerals(index + 1);
+                    
+                    const itemText = document.createElement('div');
+                    itemText.className = 'reorder-item-text';
+                    itemText.textContent = question.question.text || 'سؤال بدون نص';
+                    
+                    // إضافة صورة مصغرة إذا كانت موجودة
+                    if (question.question.image) {
+                        const thumbnail = document.createElement('img');
+                        thumbnail.className = 'thumbnail';
+                        thumbnail.src = question.question.image;
+                        thumbnail.alt = 'صورة مصغرة';
+                        itemNumber.prepend(thumbnail);
+                    }
+                    
+                    itemContent.appendChild(itemNumber);
+                    itemContent.appendChild(itemText);
+                    
+                    const dragHandle = document.createElement('div');
+                    dragHandle.className = 'reorder-handle';
+                    dragHandle.innerHTML = '≡';
+                    dragHandle.title = 'اسحب لإعادة الترتيب';
+                    
+                    listItem.appendChild(itemContent);
+                    listItem.appendChild(dragHandle);
+                    
+                    reorderList.appendChild(listItem);
+                });
+            },
+            
+            // إعداد وظيفة السحب والإفلات
+            setupDragAndDrop: function() {
+                const reorderItems = this.elements.reorderList.querySelectorAll('.reorder-item');
+                let draggedItem = null;
+                
+                // إضافة مستمعي أحداث السحب والإفلات لكل عنصر
+                reorderItems.forEach(item => {
+                    // بدء السحب
+                    item.addEventListener('dragstart', function(e) {
+                        draggedItem = this;
+                        setTimeout(() => {
+                            this.classList.add('dragging');
+                        }, 0);
+                        
+                        // تعيين بيانات النقل
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.dataTransfer.setData('text/plain', this.getAttribute('data-index'));
+                        
+                        // إنشاء صورة شبح للسحب
+                        const rect = this.getBoundingClientRect();
+                        const ghostImage = this.cloneNode(true);
+                        ghostImage.style.position = 'absolute';
+                        ghostImage.style.top = '-1000px';
+                        ghostImage.style.opacity = '0.8';
+                        ghostImage.style.width = rect.width + 'px';
+                        document.body.appendChild(ghostImage);
+                        e.dataTransfer.setDragImage(ghostImage, rect.width / 2, 20);
+                        
+                        // إزالة صورة الشبح بعد بدء السحب
+                        setTimeout(() => {
+                            document.body.removeChild(ghostImage);
+                        }, 0);
+                    });
+                    
+                    // إنهاء السحب
+                    item.addEventListener('dragend', function() {
+                        this.classList.remove('dragging');
+                        draggedItem = null;
+                    });
+                    
+                    // السماح بالإفلات
+                    item.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                    });
+                    
+                    // تغيير المظهر عند دخول العنصر المسحوب
+                    item.addEventListener('dragenter', function(e) {
+                        e.preventDefault();
+                        if (this !== draggedItem) {
+                            this.style.borderTop = '2px solid #3498db';
+                        }
+                    });
+                    
+                    // إعادة المظهر عند خروج العنصر المسحوب
+                    item.addEventListener('dragleave', function() {
+                        this.style.borderTop = '';
+                    });
+                    
+                    // معالجة الإفلات
+                    item.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        this.style.borderTop = '';
+                        
+                        if (this !== draggedItem) {
+                            const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                            const targetIndex = parseInt(this.getAttribute('data-index'));
+                            
+                            // إعادة ترتيب العناصر في واجهة المستخدم
+                            const reorderList = document.getElementById('reorderList');
+                            const items = Array.from(reorderList.querySelectorAll('.reorder-item'));
+                            
+                            // تحديد موقع الإفلات (قبل أو بعد العنصر المستهدف)
+                            const rect = this.getBoundingClientRect();
+                            const dropPosition = e.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
+                            
+                            // إزالة العنصر المسحوب من موقعه الحالي
+                            const draggedItem = items[draggedIndex];
+                            reorderList.removeChild(draggedItem);
+                            
+                            // إدراج العنصر المسحوب في الموقع الجديد
+                            if (dropPosition === 'before') {
+                                reorderList.insertBefore(draggedItem, this);
+                            } else {
+                                const nextSibling = this.nextSibling;
+                                if (nextSibling) {
+                                    reorderList.insertBefore(draggedItem, nextSibling);
+                                } else {
+                                    reorderList.appendChild(draggedItem);
+                                }
+                            }
+                            
+                            // تحديث سمات data-index لجميع العناصر
+                            items.forEach((item, index) => {
+                                item.setAttribute('data-index', index);
+                                
+                                // تحديث رقم السؤال في العنصر
+                                const itemNumber = item.querySelector('.reorder-item-number');
+                                const thumbnail = itemNumber.querySelector('.thumbnail');
+                                
+                                itemNumber.textContent = 'سؤال ' + toArabicNumerals(index + 1);
+                                
+                                if (thumbnail) {
+                                    itemNumber.prepend(thumbnail);
+                                }
+                            });
+                        }
+                    });
+                    
+                    // إضافة دعم الأجهزة اللمسية
+                    item.addEventListener('touchstart', function(e) {
+                        const touch = e.targetTouches[0];
+                        const rect = this.getBoundingClientRect();
+                        
+                        // التحقق مما إذا كان اللمس على مقبض السحب
+                        const handleRect = this.querySelector('.reorder-handle').getBoundingClientRect();
+                        if (touch.clientX >= handleRect.left && touch.clientX <= handleRect.right &&
+                            touch.clientY >= handleRect.top && touch.clientY <= handleRect.bottom) {
+                            
+                            // تعيين العنصر المسحوب
+                            draggedItem = this;
+                            this.classList.add('dragging');
+                            
+                            // تخزين موقع اللمس الأولي
+                            this.setAttribute('data-touch-start-y', touch.clientY);
+                            this.setAttribute('data-original-y', rect.top);
+                            
+                            // منع التمرير أثناء السحب
+                            e.preventDefault();
+                        }
+                    });
+                    
+                    item.addEventListener('touchmove', function(e) {
+                        if (draggedItem === this) {
+                            e.preventDefault();
+                            
+                            const touch = e.targetTouches[0];
+                            const touchStartY = parseFloat(this.getAttribute('data-touch-start-y'));
+                            const originalY = parseFloat(this.getAttribute('data-original-y'));
+                            const deltaY = touch.clientY - touchStartY;
+                            
+                            // تحريك العنصر المسحوب
+                            this.style.transform = `translateY(${deltaY}px)`;
+                            
+                            // تحديد العنصر المستهدف
+                            const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+                            const targetItem = targetElement ? targetElement.closest('.reorder-item') : null;
+                            
+                            if (targetItem && targetItem !== this) {
+                                const rect = targetItem.getBoundingClientRect();
+                                const dropPosition = touch.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
+                                
+                                // إزالة جميع حدود الإفلات
+                                document.querySelectorAll('.reorder-item').forEach(item => {
+                                    item.style.borderTop = '';
+                                    item.style.borderBottom = '';
+                                });
+                                
+                                // إضافة حدود الإفلات للعنصر المستهدف
+                                if (dropPosition === 'before') {
+                                    targetItem.style.borderTop = '2px solid #3498db';
+                                } else {
+                                    targetItem.style.borderBottom = '2px solid #3498db';
+                                }
+                            }
+                        }
+                    });
+                    
+                    item.addEventListener('touchend', function(e) {
+                        if (draggedItem === this) {
+                            // إعادة تعيين نمط العنصر المسحوب
+                            this.style.transform = '';
+                            this.classList.remove('dragging');
+                            
+                            const touch = e.changedTouches[0];
+                            
+                            // تحديد العنصر المستهدف
+                            const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+                            const targetItem = targetElement ? targetElement.closest('.reorder-item') : null;
+                            
+                            if (targetItem && targetItem !== this) {
+                                const draggedIndex = parseInt(this.getAttribute('data-index'));
+                                const targetIndex = parseInt(targetItem.getAttribute('data-index'));
+                                
+                                // تحديد موقع الإفلات
+                                const rect = targetItem.getBoundingClientRect();
+                                const dropPosition = touch.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
+                                
+                                // إعادة ترتيب العناصر
+                                const reorderList = document.getElementById('reorderList');
+                                
+                                // إزالة العنصر المسحوب من موقعه الحالي
+                                reorderList.removeChild(this);
+                                
+                                // إدراج العنصر المسحوب في الموقع الجديد
+                                if (dropPosition === 'before') {
+                                    reorderList.insertBefore(this, targetItem);
+                                } else {
+                                    const nextSibling = targetItem.nextSibling;
+                                    if (nextSibling) {
+                                        reorderList.insertBefore(this, nextSibling);
+                                    } else {
+                                        reorderList.appendChild(this);
+                                    }
+                                }
+                                
+                                // تحديث سمات data-index لجميع العناصر
+                                const items = Array.from(reorderList.querySelectorAll('.reorder-item'));
+                                items.forEach((item, index) => {
+                                    item.setAttribute('data-index', index);
+                                    
+                                    // تحديث رقم السؤال في العنصر
+                                    const itemNumber = item.querySelector('.reorder-item-number');
+                                    const thumbnail = itemNumber.querySelector('.thumbnail');
+                                    
+                                    itemNumber.textContent = 'سؤال ' + toArabicNumerals(index + 1);
+                                    
+                                    if (thumbnail) {
+                                        itemNumber.prepend(thumbnail);
+                                    }
+                                });
+                            }
+                            
+                            // إزالة جميع حدود الإفلات
+                            document.querySelectorAll('.reorder-item').forEach(item => {
+                                item.style.borderTop = '';
+                                item.style.borderBottom = '';
+                            });
+                            
+                            draggedItem = null;
+                        }
+                    });
+                });
+            },
+            
+            // حفظ ترتيب الأسئلة الجديد
+            saveReorderedQuestions: function() {
+                try {
+                    // الحصول على الترتيب الجديد من قائمة إعادة الترتيب
+                    const reorderItems = this.elements.reorderList.querySelectorAll('.reorder-item');
+                    const newOrder = [];
+                    
+                    reorderItems.forEach(item => {
+                        const originalIndex = parseInt(item.getAttribute('data-index'));
+                        newOrder.push(originalIndex);
+                    });
+                    
+                    // تطبيق الترتيب الجديد
+                    if (DataManager.reorderQuestions(newOrder)) {
+                        this.hideReorderModal();
+                        this.showSuccess('تم إعادة ترتيب الأسئلة بنجاح');
+                    }
+                } catch (error) {
+                    console.error('Error saving reordered questions:', error);
+                    this.showError('حدث خطأ أثناء حفظ ترتيب الأسئلة: ' + error.message);
+                }
             },
             
             // استيراد من ملف JSON
